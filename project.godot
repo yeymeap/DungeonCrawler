@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="DungeonCrawler"
-run/main_scene="uid://bkrt3t42t7p2l"
+run/main_scene="uid://dvpdr6nl1efpp"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
