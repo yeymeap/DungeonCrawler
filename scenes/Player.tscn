@@ -41,7 +41,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
-size = Vector2(12, 16)
+size = Vector2(12, 15)
 
 [node name="Player" type="CharacterBody2D"]
 z_index = 5
@@ -54,7 +54,7 @@ sprite_frames = SubResource("SpriteFrames_tuyoq")
 autoplay = "default"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 3)
+position = Vector2(0, 3.5)
 shape = SubResource("RectangleShape2D_g2els")
 
 [node name="Camera2D" type="Camera2D" parent="."]
