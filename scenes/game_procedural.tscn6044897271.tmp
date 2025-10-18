@@ -1,9 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dvpdr6nl1efpp"]
+[gd_scene load_steps=7 format=3 uid="uid://dvpdr6nl1efpp"]
 
 [ext_resource type="Script" uid="uid://4vep3ag1r0o3" path="res://scripts/dungeon_generator.gd" id="1_pvq7q"]
 [ext_resource type="Texture2D" uid="uid://cy20q1afuwg5k" path="res://assets/sprites/world_tileset.png" id="2_mtlol"]
 [ext_resource type="PackedScene" uid="uid://bvge42uu3xrcp" path="res://scenes/player.tscn" id="3_hrfmx"]
-[ext_resource type="Script" uid="uid://dkslrwf1hn83e" path="res://scenes/drawer.gd" id="3_mtlol"]
 [ext_resource type="PackedScene" uid="uid://xrf3ogc35vwv" path="res://scenes/slime.tscn" id="4_n68wl"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnu2h"]
@@ -177,6 +176,18 @@ sources/0 = SubResource("TileSetAtlasSource_lnu2h")
 
 [node name="DungeonGenerator" type="Node2D" parent="."]
 script = ExtResource("1_pvq7q")
+connect_type = null
+play_area_min = null
+play_area_max = null
+room_width_min = null
+room_width_max = null
+room_height_min = null
+room_height_max = null
+num_rooms = 30
+bg_tile_id = null
+floor_tile_id = null
+wall_tile_id = null
+padding_tile_id = null
 
 [node name="Background" type="TileMapLayer" parent="DungeonGenerator"]
 use_parent_material = true
@@ -189,9 +200,6 @@ tile_set = SubResource("TileSet_lbhrr")
 [node name="Wall" type="TileMapLayer" parent="DungeonGenerator"]
 use_parent_material = true
 tile_set = SubResource("TileSet_lbhrr")
-
-[node name="Drawer" type="Node2D" parent="DungeonGenerator"]
-script = ExtResource("3_mtlol")
 
 [node name="Player" parent="." instance=ExtResource("3_hrfmx")]
 position = Vector2(-2, -11)
