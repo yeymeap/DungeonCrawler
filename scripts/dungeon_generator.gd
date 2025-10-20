@@ -31,11 +31,15 @@ const CORRIDOR_WIDTH = 3
 const WALL_THICKNESS = 1
 
 func _ready():
+	pass
+
+func generate_dungeon():
 	fill_background()
 	place_rooms()
 	corridors = prim_mst()
 	create_corridors()
-	print(corridors)
+	#print(corridors)
+	print(room_centers)
 
 func fill_background() -> void: # fill with background tiles
 	for y in range(-100, 100):
@@ -58,7 +62,7 @@ func get_room_center(room: Rect2i) -> Vector2i:
 func generate_room(origin: Vector2i) -> bool: # generate rooms
 	var room_height = randi_range(room_height_min, room_height_max)
 	var room_width = randi_range(room_width_min, room_width_max)
-	var room_padding = 2
+	var room_padding = 10
 	
 	var padded_room = Rect2i(
 		origin - Vector2i(room_padding, room_padding),
@@ -143,24 +147,24 @@ func connect_rooms(start: Vector2i, end: Vector2i) -> void:
 	var threshold = 5
 	var dx = abs(end.x - start.x)
 	var dy = abs(end.y - start.y)
-	print("dx: ", dx)
-	print("dy: ", dy)
+	#print("dx: ", dx)
+	#print("dy: ", dy)
 	if dx <= threshold or dy <= threshold:
 		create_straight_corridor(start, end)
 	else:
-		draw_L()
+		draw_L(start, end)
 
 func create_straight_corridor(start: Vector2i, end: Vector2i) -> void:
 	var is_horizontal = abs(end.x - start.x) >= abs(end.y - start.y)
 	if is_horizontal:
-		print("Straight horizontal corridor")
+		#print("Straight horizontal corridor")
 		var x_min = min(start.x, end.x)
 		var x_max = max(start.x, end.x)
 		var y = start.y
 		for x in range(x_min, x_max + 1):
 			carve_straight_segment(Vector2i(x, y), true)
 	else:
-		print("Straight vertical corridor")
+		#print("Straight vertical corridor")
 		var y_min = min(start.y, end.y)
 		var y_max = max(start.y, end.y)
 		var x = start.x
@@ -175,7 +179,7 @@ func carve_straight_segment(center: Vector2i, is_horizontal: bool) -> void:
 			wall_tilemaplayer.erase_cell(tile_pos)
 		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
 			var wall_pos = Vector2i(center.x, center.y + wall_offset)
-			if not is_floor_tile(wall_pos) and not is_wall_tile(wall_pos):
+			if not is_floor_tile(wall_pos): #and not is_wall_tile(wall_pos):
 				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
 	else:
 		for dx in range(-CORRIDOR_WIDTH / 2, CORRIDOR_WIDTH / 2 + 1):
@@ -184,11 +188,41 @@ func carve_straight_segment(center: Vector2i, is_horizontal: bool) -> void:
 			wall_tilemaplayer.erase_cell(tile_pos)
 		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
 			var wall_pos = Vector2i(center.x + wall_offset, center.y)
-			if not is_floor_tile(wall_pos) and not is_wall_tile(wall_pos):
+			if not is_floor_tile(wall_pos): #and not is_wall_tile(wall_pos):
 				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
 
-func draw_L() -> void:
+func draw_L(start: Vector2i, end: Vector2i) -> void:
+	#print("L corridor")
 	var choice = randf() < 0.5
+	var corner: Vector2i
+	if choice:
+		corner = Vector2i(end.x, start.y)
+		create_straight_corridor(start, corner)
+		create_straight_corridor(corner, end)
+	else:
+		corner = Vector2i(start.x, end.y)
+		create_straight_corridor(start, corner)
+		create_straight_corridor(corner, end)
+	fill_corner(corner)
+
+func fill_corner(corner: Vector2i):
+	var half_width = CORRIDOR_WIDTH / 2
+	
+	for dx in range(-half_width, half_width + 1):
+		for dy in range(-half_width, half_width + 1):
+			var tile_pos = Vector2i(corner.x + dx, corner.y + dy)
+			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
+			wall_tilemaplayer.erase_cell(tile_pos)
+	
+	# Add walls around the corner square
+	for dx in range(-half_width - 1, half_width + 2):
+		for dy in range(-half_width - 1, half_width + 2):
+			# Skip the interior
+			if abs(dx) <= half_width and abs(dy) <= half_width:
+				continue
+			var wall_pos = Vector2i(corner.x + dx, corner.y + dy)
+			if not is_floor_tile(wall_pos): #and not is_wall_tile(wall_pos):
+				wall_tilemaplayer.set_cell(wall_pos, 0, WALL_TILE)
 
 func is_floor_tile(pos: Vector2i) -> bool:
 	var tile_data = floor_tilemaplayer.get_cell_tile_data(pos)

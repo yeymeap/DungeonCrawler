@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 const SPEED = 130.0
+var spawn_position: Vector2
 
 func _physics_process(delta: float) -> void:
 	# Get a normalized direction vector from input
