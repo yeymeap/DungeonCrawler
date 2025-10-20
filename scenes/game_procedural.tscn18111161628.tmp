@@ -177,7 +177,7 @@ sources/0 = SubResource("TileSetAtlasSource_lnu2h")
 
 [node name="DungeonGenerator" type="Node2D" parent="."]
 script = ExtResource("1_pvq7q")
-num_rooms = 30
+num_rooms = 10
 
 [node name="Background" type="TileMapLayer" parent="DungeonGenerator"]
 use_parent_material = true

@@ -23,19 +23,26 @@ var padded_rooms: Array[Rect2i] = []
 var room_centers: Array[Vector2i] = []
 var corridors: Array = []
 
+const FLOOR_TILE = Vector2i(1, 14)
+#const WALL_TILE = Vector2i(2, 14)
+const WALL_TILE = Vector2i(7, 0)
+
+const CORRIDOR_WIDTH = 3
+const WALL_THICKNESS = 1
+
 func _ready():
 	fill_background()
 	place_rooms()
 	corridors = prim_mst()
-	#generate_corridors()
+	create_corridors()
 	print(corridors)
 
-func fill_background(): # fill with background tiles
+func fill_background() -> void: # fill with background tiles
 	for y in range(-100, 100):
 		for x in range(-100, 100):
 			background_tilemaplayer.set_cell(Vector2i(x, y), 0, bg_tile_id)
 
-func place_rooms():
+func place_rooms() -> void:
 	var attempts := 0
 	var placed := 0
 	while placed < num_rooms and attempts < num_rooms * 5:
@@ -48,7 +55,7 @@ func place_rooms():
 func get_room_center(room: Rect2i) -> Vector2i:
 	return room.position + room.size / 2
 
-func generate_room(origin: Vector2i): # generate rooms
+func generate_room(origin: Vector2i) -> bool: # generate rooms
 	var room_height = randi_range(room_height_min, room_height_max)
 	var room_width = randi_range(room_width_min, room_width_max)
 	var room_padding = 2
@@ -83,7 +90,13 @@ func generate_room(origin: Vector2i): # generate rooms
 				background_tilemaplayer.set_cell(pos, 0, padding_tile_id)"""
 				
 	return true
-	
+
+func overlaps_room(rectangle: Rect2i) -> bool:
+	for room in rooms:
+		if room.intersects(rectangle):
+			return true
+	return false
+
 func distance_between_room_centers(a: Vector2i, b: Vector2i) -> float:
 	return a.distance_to(b)
 
@@ -119,4 +132,68 @@ func prim_mst() -> Array:
 		connected_indices.append(to_index)
 		mst_edges.append([room_centers[from_index], room_centers[to_index]])
 	return mst_edges
+
+func create_corridors() -> void:
+	for conn in corridors:
+		var start = conn[0]
+		var end = conn[1]
+		connect_rooms(start, end)
+		
+func connect_rooms(start: Vector2i, end: Vector2i) -> void:
+	var threshold = 5
+	var dx = abs(end.x - start.x)
+	var dy = abs(end.y - start.y)
+	print("dx: ", dx)
+	print("dy: ", dy)
+	if dx <= threshold or dy <= threshold:
+		create_straight_corridor(start, end)
+	else:
+		draw_L()
+
+func create_straight_corridor(start: Vector2i, end: Vector2i) -> void:
+	var is_horizontal = abs(end.x - start.x) >= abs(end.y - start.y)
+	if is_horizontal:
+		print("Straight horizontal corridor")
+		var x_min = min(start.x, end.x)
+		var x_max = max(start.x, end.x)
+		var y = start.y
+		for x in range(x_min, x_max + 1):
+			carve_straight_segment(Vector2i(x, y), true)
+	else:
+		print("Straight vertical corridor")
+		var y_min = min(start.y, end.y)
+		var y_max = max(start.y, end.y)
+		var x = start.x
+		for y in range(y_min, y_max + 1):
+			carve_straight_segment(Vector2i(x, y), false)
 	
+func carve_straight_segment(center: Vector2i, is_horizontal: bool) -> void:
+	if is_horizontal:
+		for dy in range(-CORRIDOR_WIDTH / 2, CORRIDOR_WIDTH / 2 + 1):
+			var tile_pos = Vector2i(center.x, center.y + dy)
+			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
+			wall_tilemaplayer.erase_cell(tile_pos)
+		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
+			var wall_pos = Vector2i(center.x, center.y + wall_offset)
+			if not is_floor_tile(wall_pos) and not is_wall_tile(wall_pos):
+				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
+	else:
+		for dx in range(-CORRIDOR_WIDTH / 2, CORRIDOR_WIDTH / 2 + 1):
+			var tile_pos = Vector2i(center.x + dx, center.y)
+			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
+			wall_tilemaplayer.erase_cell(tile_pos)
+		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
+			var wall_pos = Vector2i(center.x + wall_offset, center.y)
+			if not is_floor_tile(wall_pos) and not is_wall_tile(wall_pos):
+				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
+
+func draw_L() -> void:
+	var choice = randf() < 0.5
+
+func is_floor_tile(pos: Vector2i) -> bool:
+	var tile_data = floor_tilemaplayer.get_cell_tile_data(pos)
+	return tile_data != null
+	
+func is_wall_tile(pos: Vector2i) -> bool:
+	var tile_data = wall_tilemaplayer.get_cell_tile_data(pos)
+	return tile_data != null

@@ -13,5 +13,5 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 	# Debug: print actual speed (length of velocity vector)
-	if direction != Vector2.ZERO:
-		print("Velocity: ", velocity, " | Speed: ", velocity.length())
+	#if direction != Vector2.ZERO:
+		#print("Velocity: ", velocity, " | Speed: ", velocity.length())

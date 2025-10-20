@@ -23,14 +23,14 @@ func zoom_in():
 	if current_zoom_index < zoom_levels.size() - 1:
 		current_zoom_index += 1
 		zoom = zoom_levels[current_zoom_index]
-		print("Zooming in")
-		print(zoom_levels[current_zoom_index])
-		print("Zoom index: ", current_zoom_index)
+		#print("Zooming in")
+		#print(zoom_levels[current_zoom_index])
+		#print("Zoom index: ", current_zoom_index)
 
 func zoom_out():
 	if current_zoom_index > 0:
 		current_zoom_index -= 1
 		zoom = zoom_levels[current_zoom_index]
-		print("Zooming out")
-		print(zoom_levels[current_zoom_index])
-		print("Zoom index: ", current_zoom_index)
+		#print("Zooming out")
+		#print(zoom_levels[current_zoom_index])
+		#print("Zoom index: ", current_zoom_index)

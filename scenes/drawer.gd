@@ -4,7 +4,7 @@ const TILE_SIZE = 16
 
 func _draw():
 	var parent_corridors = get_parent().corridors
-	print("Drawing")
+	#print("Drawing")
 	for c in parent_corridors:
 		var start = c[0] * TILE_SIZE
 		var end = c[1] * TILE_SIZE
