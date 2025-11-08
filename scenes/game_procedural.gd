@@ -8,7 +8,9 @@ func _input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			print("Player position:", player.global_position)
-				
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_R:
+			reset_game()
 func _ready():
 	dungeon.generate_dungeon()
 	if dungeon.room_centers.size() > 0:
@@ -21,3 +23,5 @@ func _ready():
 		print("Player spawned at:", player.global_position)
 	else:
 		print("No room centers generated!")
+func reset_game():
+	get_tree().reload_current_scene()
