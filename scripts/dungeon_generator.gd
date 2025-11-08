@@ -3,6 +3,7 @@ extends Node2D
 @onready var background_tilemaplayer: TileMapLayer = $Background
 @onready var floor_tilemaplayer: TileMapLayer = $Floor
 @onready var wall_tilemaplayer: TileMapLayer = $Wall
+@onready var enemy_scene = preload("res://scenes/slime.tscn")
 
 @export_enum("L-corridor", "Random Walk") var connect_type: String = "L-corridor"
 @export var play_area_min = -50
@@ -172,25 +173,28 @@ func create_straight_corridor(start: Vector2i, end: Vector2i) -> void:
 			carve_straight_segment(Vector2i(x, y), false)
 	
 func carve_straight_segment(center: Vector2i, is_horizontal: bool) -> void:
+	var half_width = CORRIDOR_WIDTH / 2
+	
 	if is_horizontal:
-		for dy in range(-CORRIDOR_WIDTH / 2, CORRIDOR_WIDTH / 2 + 1):
+		for dy in range(-half_width, half_width + 1):
 			var tile_pos = Vector2i(center.x, center.y + dy)
 			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
 			wall_tilemaplayer.erase_cell(tile_pos)
-		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
-			var wall_pos = Vector2i(center.x, center.y + wall_offset)
-			if not is_floor_tile(wall_pos): #and not is_wall_tile(wall_pos):
-				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
 	else:
-		for dx in range(-CORRIDOR_WIDTH / 2, CORRIDOR_WIDTH / 2 + 1):
+		for dx in range(-half_width, half_width + 1):
 			var tile_pos = Vector2i(center.x + dx, center.y)
 			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
 			wall_tilemaplayer.erase_cell(tile_pos)
-		for wall_offset in [-CORRIDOR_WIDTH / 2 - 1, CORRIDOR_WIDTH / 2 + 1]:
-			var wall_pos = Vector2i(center.x + wall_offset, center.y)
-			if not is_floor_tile(wall_pos): #and not is_wall_tile(wall_pos):
-				wall_tilemaplayer.set_cell(wall_pos, 0 ,WALL_TILE)
-
+	
+	for dx in range(-half_width - 1, half_width + 2):
+		for dy in range(-half_width - 1, half_width + 2):
+			if abs(dx) <= half_width and abs(dy) <= half_width:
+				continue
+			
+			var wall_pos = Vector2i(center.x + dx, center.y + dy)
+			if not is_floor_tile(wall_pos):
+				wall_tilemaplayer.set_cell(wall_pos, 0, WALL_TILE)
+				
 func draw_L(start: Vector2i, end: Vector2i) -> void:
 	#print("L corridor")
 	var choice = randf() < 0.5
@@ -214,10 +218,8 @@ func fill_corner(corner: Vector2i):
 			floor_tilemaplayer.set_cell(tile_pos, 0, FLOOR_TILE)
 			wall_tilemaplayer.erase_cell(tile_pos)
 	
-	# Add walls around the corner square
 	for dx in range(-half_width - 1, half_width + 2):
 		for dy in range(-half_width - 1, half_width + 2):
-			# Skip the interior
 			if abs(dx) <= half_width and abs(dy) <= half_width:
 				continue
 			var wall_pos = Vector2i(corner.x + dx, corner.y + dy)
@@ -231,3 +233,17 @@ func is_floor_tile(pos: Vector2i) -> bool:
 func is_wall_tile(pos: Vector2i) -> bool:
 	var tile_data = wall_tilemaplayer.get_cell_tile_data(pos)
 	return tile_data != null
+
+func spawn_enemy():
+	for room in rooms:
+		if randf() < 0.6:
+			var x = randi_range(room.position.x + 1, room.position.x + room.size.x - 2)
+			var y = randi_range(room.position.y + 1, room.position.y + room.size.y - 2)
+			var spawn_pos = Vector2i(x, y)
+			spawn_enemy_at(spawn_pos)
+			print("Enemy spawn at: ", spawn_pos)
+
+func spawn_enemy_at(tile_pos: Vector2i) -> void:
+	var enemy = enemy_scene.instantiate()
+	enemy.position = floor_tilemaplayer.map_to_local(tile_pos)
+	add_child(enemy)
