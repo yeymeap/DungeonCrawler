@@ -23,6 +23,7 @@ var rooms: Array[Rect2i] = []
 var padded_rooms: Array[Rect2i] = []
 var room_centers: Array[Vector2i] = []
 var corridors: Array = []
+var spawn_room 
 
 const FLOOR_TILE = Vector2i(1, 14)
 #const WALL_TILE = Vector2i(2, 14)
@@ -39,6 +40,7 @@ func generate_dungeon():
 	place_rooms()
 	corridors = prim_mst()
 	create_corridors()
+	spawn_room = rooms.pick_random()
 	#print(corridors)
 	print(room_centers)
 
@@ -236,7 +238,7 @@ func is_wall_tile(pos: Vector2i) -> bool:
 
 func spawn_enemy():
 	for room in rooms:
-		if randf() < 0.6:
+		if randf() < 0.6 and room != spawn_room:
 			var x = randi_range(room.position.x + 1, room.position.x + room.size.x - 2)
 			var y = randi_range(room.position.y + 1, room.position.y + room.size.y - 2)
 			var spawn_pos = Vector2i(x, y)
