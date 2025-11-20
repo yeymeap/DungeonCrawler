@@ -21,7 +21,7 @@ func _ready():
 		await get_tree().process_frame
 		camera.position_smoothing_enabled = true
 		print("Player spawned at:", player.global_position)
-		dungeon.spawn_enemy()
+		dungeon.spawn_enemies()
 	else:
 		print("No room centers generated!")
 func reset_game():

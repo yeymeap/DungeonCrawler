@@ -21,6 +21,7 @@ extends Node2D
 
 var rooms: Array[Rect2i] = []
 var padded_rooms: Array[Rect2i] = []
+var weighted_rooms = []
 var room_centers: Array[Vector2i] = []
 var corridors: Array = []
 var spawn_room 
@@ -236,7 +237,7 @@ func is_wall_tile(pos: Vector2i) -> bool:
 	var tile_data = wall_tilemaplayer.get_cell_tile_data(pos)
 	return tile_data != null
 
-func spawn_enemy():
+func spawn_enemy(): # unused
 	for room in rooms:
 		if randf() < 0.6 and room != spawn_room:
 			var x = randi_range(room.position.x + 1, room.position.x + room.size.x - 2)
@@ -244,7 +245,59 @@ func spawn_enemy():
 			var spawn_pos = Vector2i(x, y)
 			spawn_enemy_at(spawn_pos)
 			print("Enemy spawn at: ", spawn_pos)
-
+			
+func spawn_enemies():
+	var spawn_center = spawn_room.position + spawn_room.size / 2
+	var occupied_positions = {} 
+	
+	var max_dist = 0.0
+	for room in rooms:
+		var room_center = room.position + room.size / 2
+		var d = room_center.distance_to(spawn_center)
+		if d > max_dist:
+			max_dist = d
+	
+	for room in rooms:
+		if room == spawn_room:
+			continue
+		
+		var area = room.size.x * room.size.y
+		var room_center = room.position + room.size / 2
+		var dist = room_center.distance_to(spawn_center)
+		
+		var dist_factor = dist / max_dist if max_dist > 0 else 0
+		
+		var weight = (area * 0.002) + (dist_factor * 1.0)
+		
+		var fractional_part = weight - floor(weight)
+		var enemy_count = int(floor(weight)) + (1 if randf() < fractional_part else 0)
+		
+		enemy_count = clamp(enemy_count, 0, 6)
+		
+		if enemy_count == 0:
+			continue
+		
+		for i in enemy_count:
+			var spawn_pos = Vector2i.ZERO
+			var attempts = 0
+			var max_attempts = 20
+			
+			while attempts < max_attempts:
+				var x = randi_range(room.position.x + 1, room.position.x + room.size.x - 2)
+				var y = randi_range(room.position.y + 1, room.position.y + room.size.y - 2)
+				spawn_pos = Vector2i(x, y)
+				
+				if not occupied_positions.has(spawn_pos):
+					break
+				attempts += 1
+			
+			if occupied_positions.has(spawn_pos):
+				continue
+			
+			occupied_positions[spawn_pos] = true
+			spawn_enemy_at(spawn_pos)
+			print("Enemy spawn at: ", spawn_pos)
+			
 func spawn_enemy_at(tile_pos: Vector2i) -> void:
 	var enemy = enemy_scene.instantiate()
 	enemy.position = floor_tilemaplayer.map_to_local(tile_pos)
