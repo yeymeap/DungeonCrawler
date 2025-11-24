@@ -3,16 +3,23 @@ extends CharacterBody2D
 const SPEED = 130.0
 var spawn_position: Vector2
 
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+
 func _physics_process(delta: float) -> void:
-	# Get a normalized direction vector from input
 	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
-	# Scale it by speed to get velocity
+	if direction.x > 0:
+		animated_sprite.flip_h = false
+	elif direction.x < 0:
+		animated_sprite.flip_h = true
+	
+	if direction.length() == 0:
+		animated_sprite.play("default")
+	else:
+		animated_sprite.play("run")
 	velocity = direction * SPEED
 
-	# Apply movement with collision
 	move_and_slide()
 	
-	# Debug: print actual speed (length of velocity vector)
 	#if direction != Vector2.ZERO:
 		#print("Velocity: ", velocity, " | Speed: ", velocity.length())
