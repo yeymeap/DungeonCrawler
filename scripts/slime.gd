@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export_enum("Horizontal", "Vertical") var move_axis: String = "Horizontal"
 @export var can_move: bool = true 
 @export var speed: float = 60
+@export var chase_range = 200
 
 var direction: int = 1
 
@@ -10,6 +11,7 @@ var direction: int = 1
 @onready var ray_down = $RayCastDown
 @onready var ray_left = $RayCastLeft
 @onready var ray_right = $RayCastRight
+@onready var player = get_node("/root/Game/Player")
 
 func _physics_process(delta):
 	if can_move:
@@ -27,5 +29,12 @@ func _physics_process(delta):
 			elif ray_up.is_colliding():
 				direction = 1
 			velocity.y = direction * speed
+			
+	var to_player = player.global_position - global_position
+	var distance = to_player.length()
 
-	#move_and_slide()
+	if distance < chase_range:
+		velocity = to_player.normalized() * speed
+		move_and_slide()
+	else:
+		velocity = Vector2.ZERO
