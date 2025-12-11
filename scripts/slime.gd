@@ -18,7 +18,7 @@ var direction: int = 1
 @onready var health_bar = $EnemyHealthBar
 
 func _ready():
-	process_mode = Node.PROCESS_MODE_PAUSABLE  # Add this line
+	process_mode = Node.PROCESS_MODE_PAUSABLE # pausable
 	health_bar.initialize(MAX_HEALTH)
 	take_damage(20)
 	

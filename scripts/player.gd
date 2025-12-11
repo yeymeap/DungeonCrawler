@@ -10,7 +10,7 @@ var spawn_position: Vector2
 @onready var health_bar := $CanvasLayer/HealthBar
 
 func _ready():
-	process_mode = Node.PROCESS_MODE_PAUSABLE  # Add this line
+	process_mode = Node.PROCESS_MODE_PAUSABLE # pausable
 	health_bar.max_value = MAX_HEALTH
 	health_bar.value = health
 	

@@ -1,7 +1,7 @@
 extends Area2D
 
 @onready var timer = $Timer
-var damage_amount := 20  # how much health this hit does
+var damage_amount := 20
 
 func _on_body_entered(body: Node2D) -> void:
 	# Only affect player

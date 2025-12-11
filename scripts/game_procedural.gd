@@ -6,7 +6,7 @@ extends Node2D
 @onready var pause_menu = $PauseMenu
 
 func _input(event):
-	if event.is_action_pressed("ui_cancel"):  # ESC key
+	if event.is_action_pressed("ui_cancel"):
 		if get_tree().paused:
 			pause_menu.resume_game()
 		else:
