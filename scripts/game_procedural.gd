@@ -3,8 +3,14 @@ extends Node2D
 @onready var player = $Player
 @onready var dungeon = $DungeonGenerator
 @onready var camera = $Player/Camera2D
+@onready var pause_menu = $PauseMenu
 
 func _input(event):
+	if event.is_action_pressed("ui_cancel"):  # ESC key
+		if get_tree().paused:
+			pause_menu.resume_game()
+		else:
+			pause_menu.pause_game()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			print("Player position:", player.global_position)
@@ -12,6 +18,7 @@ func _input(event):
 		if event.keycode == KEY_R:
 			reset_game()
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	dungeon.generate_dungeon()
 	if dungeon.room_centers.size() > 0:
 		var tile_size = Vector2(16, 16)

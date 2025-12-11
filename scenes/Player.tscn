@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://dhy636g13vdg3" path="res://assets/sprites/knight.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://tvpcnmfiaan5" path="res://scripts/player.gd" id="1_4flbx"]
 [ext_resource type="Script" uid="uid://b76262eaprr7d" path="res://scripts/camera_2d.gd" id="3_qhqgy"]
+[ext_resource type="StyleBox" uid="uid://cy7ovu6rh6de2" path="res://scenes/graystyle.tres" id="4_qlg0r"]
+[ext_resource type="StyleBox" uid="uid://cgjag86v8xiht" path="res://scenes/redstyle.tres" id="5_tuyoq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g2els"]
 atlas = ExtResource("1_3vyb7")
@@ -160,12 +162,6 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_qhqgy"]
 radius = 5.5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qhqgy"]
-bg_color = Color(0.48452926, 0.48452926, 0.48452926, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dqkch"]
-bg_color = Color(0.9063318, 0.3491902, 0.3491902, 1)
-
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 z_index = 5
 collision_layer = 2
@@ -195,7 +191,7 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 220.0
 offset_bottom = 50.0
-theme_override_styles/background = SubResource("StyleBoxFlat_qhqgy")
-theme_override_styles/fill = SubResource("StyleBoxFlat_dqkch")
+theme_override_styles/background = ExtResource("4_qlg0r")
+theme_override_styles/fill = ExtResource("5_tuyoq")
 value = 100.0
 show_percentage = false

@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://xrf3ogc35vwv"]
+[gd_scene load_steps=11 format=3 uid="uid://xrf3ogc35vwv"]
 
 [ext_resource type="Script" uid="uid://cdsusjhd86rxc" path="res://scripts/slime.gd" id="1_n6pvg"]
 [ext_resource type="Texture2D" uid="uid://chb5lkp5qg2kx" path="res://assets/sprites/slime_purple.png" id="1_p2gj0"]
 [ext_resource type="PackedScene" uid="uid://bpwwwmyvl8xl6" path="res://scenes/killzone.tscn" id="2_n6pvg"]
+[ext_resource type="PackedScene" uid="uid://brmfbqls4mmhr" path="res://scenes/enemy_healthbar.tscn" id="4_pjw23"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5uy6h"]
 atlas = ExtResource("1_p2gj0")
@@ -84,3 +85,5 @@ visible = false
 position = Vector2(0, 6)
 target_position = Vector2(8, 0)
 collision_mask = 5
+
+[node name="EnemyHealthBar" parent="." instance=ExtResource("4_pjw23")]
