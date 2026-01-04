@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var quit_button = $Control/VBoxContainer/QuitButton
 
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS  # ADD THIS LINE
 	hide()
 	resume_button.pressed.connect(_on_resume_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
