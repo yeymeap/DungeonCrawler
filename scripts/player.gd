@@ -15,6 +15,11 @@ var attack_damage = 25
 var is_attacking = false
 var attack_cooldown = 0.5
 var can_attack = true
+var is_dead = false
+
+func _input(event):
+	if event.is_action_pressed("ui_accept") and can_attack and not is_dead:
+		perform_attack()
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_PAUSABLE # pausable
@@ -22,44 +27,33 @@ func _ready():
 	health_bar.value = health
 	melee_attack.monitoring = false
 	
-func _input(event):
-	if event.is_action_pressed("ui_accept") and can_attack:
-		perform_attack()
-
 func perform_attack():
-	if is_attacking:
+	if is_attacking or is_dead:
 		return
 		
 	is_attacking = true
 	can_attack = false
-
 	var tween = create_tween()
 	tween.tween_property(sprite, "scale", sprite.scale * 1.3, 0.1)
 	tween.tween_property(sprite, "scale", sprite.scale, 0.1)
 	
 	print("360° attack!")
-
 	melee_attack.monitoring = true
 	
 	await get_tree().create_timer(0.03).timeout
-
 	var bodies = melee_attack.get_overlapping_bodies()
 	
-	#print("Bodies detected:", bodies.size())
 	for body in bodies:
 		if body.has_method("take_damage") and body != self:
-			#print("DEALING DAMAGE to:", body.name)
 			body.take_damage(attack_damage)
-
+	
 	await get_tree().create_timer(0.2).timeout
 	melee_attack.monitoring = false
-
 	await get_tree().create_timer(attack_cooldown).timeout
 	is_attacking = false
 	can_attack = true
 
 func _physics_process(delta: float) -> void:
-	
 	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
 	if direction.x > 0:
@@ -79,6 +73,9 @@ func _physics_process(delta: float) -> void:
 		#print("Velocity: ", velocity, " | Speed: ", velocity.length())
 
 func take_damage(amount):
+	if is_dead:
+		return
+		
 	print("take_damage called, amount:", amount)
 	health -= amount
 	health = clamp(health, 0, MAX_HEALTH)
@@ -89,6 +86,10 @@ func take_damage(amount):
 		player_die()
 
 func player_die():
+	if is_dead:
+		return
+		
+	is_dead = true
 	print("player_die() called")
 	
 	set_physics_process(false)
@@ -99,7 +100,6 @@ func player_die():
 	tween.set_parallel(true)
 	
 	tween.tween_property(sprite, "modulate:a", 0.0, 1.5)
-	
 	tween.tween_property(sprite, "scale", Vector2(0.1, 0.1), 1.5).set_ease(Tween.EASE_IN)
 	tween.tween_property(sprite, "rotation", deg_to_rad(360), 1.5)
 	
@@ -107,7 +107,7 @@ func player_die():
 	
 	Engine.time_scale = 1.0
 	
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.5, false).timeout
 	
 	print("Reloading scene")
 	get_tree().reload_current_scene()
