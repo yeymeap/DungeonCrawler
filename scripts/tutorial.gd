@@ -31,7 +31,7 @@ func _input(event):
 func start_welcome():
 	tutorial_paused = true
 	get_tree().paused = true
-	title_label.text = "WELCOME TO THE TUTORIAL"
+	title_label.text = "WELCOME TO THE TUTORIAL!"
 	instruction_label.text = "Learn the basics of movement and combat.
 
 Press SPACE to begin!"
@@ -41,7 +41,7 @@ func show_completion():
 	get_tree().paused = true
 	instruction_label.text = "Tutorial Complete!
 
-Press SPACE to return to main menu"
+Press SPACE to return to main menu!"
 	current_step = 99
 
 func continue_tutorial():
@@ -55,7 +55,7 @@ func continue_tutorial():
 	if current_step == -1:
 		current_step = 0
 		title_label.text = "TUTORIAL"
-		show_instruction("Move to the next room using WASD or Arrow Keys")
+		show_instruction("Move to the next room using WASD or Arrow Keys!")
 
 func _on_room_entered(body: Node2D):
 	if body.has_method("take_damage"):
@@ -72,14 +72,14 @@ func check_tutorial_progress():
 	if current_step == 0:
 		if entered_next_room:
 			current_step = 1
-			show_instruction("Great! Now press SPACE to attack nearby enemies")
+			show_instruction("Great! Now press SPACE to attack nearby enemies!")
 	
 	elif current_step == 1:
 		var enemies = get_tree().get_nodes_in_group("enemies")
 		for enemy in enemies:
 			if enemy.has_method("was_just_hit") and enemy.was_just_hit():
 				current_step = 2
-				show_instruction("Nice! Defeat all enemies to complete the tutorial")
+				show_instruction("Nice! Defeat all enemies to complete the tutorial!")
 				break
 	
 	elif current_step == 2:

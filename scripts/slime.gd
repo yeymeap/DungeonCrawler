@@ -55,7 +55,7 @@ func _physics_process(delta):
 					direction = 1
 				velocity.y = direction * speed
 	
-	move_and_slide()  # Call only once at the end
+	move_and_slide()
 
 func take_damage(amount: int):
 	health -= amount
