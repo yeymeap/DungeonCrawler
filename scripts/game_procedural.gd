@@ -17,6 +17,9 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_R:
 			reset_game()
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_G:
+			kill_all_enemies()
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	dungeon.generate_dungeon()
@@ -33,3 +36,13 @@ func _ready():
 		print("No room centers generated!")
 func reset_game():
 	get_tree().reload_current_scene()
+func kill_all_enemies():
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	
+	for enemy in enemies:
+		if enemy.has_method("die"):
+			enemy.die()
+		else:
+			enemy.queue_free()
+	
+	print("All enemies eliminated:", enemies.size())

@@ -10,7 +10,6 @@ func _ready():
 	monitoring = true
 	body_entered.connect(_on_body_entered)
 	
-	# Create circle shape visually
 	polygon.polygon = create_circle(8, 16)
 	polygon.color = Color(0.2, 1, 0.2)
 	

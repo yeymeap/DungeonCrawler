@@ -6,6 +6,7 @@ extends Node2D
 @onready var enemy_scene = preload("res://scenes/slime.tscn")
 @onready var fire_obstacle_scene = preload("res://scenes/fire_obstacle.tscn")
 @onready var health_pack_scene = preload("res://scenes/health_pack.tscn")
+@onready var portal_scene = preload("res://scenes/portal.tscn")
 
 @export_enum("L-corridor", "Random Walk") var connect_type: String = "L-corridor"
 @export var play_area_min = -50
@@ -20,6 +21,10 @@ extends Node2D
 @export var floor_tile_id: Vector2i = Vector2i(0, 12)
 @export var wall_tile_id: Vector2i = Vector2i(7, 0)
 @export var padding_tile_id: Vector2i = Vector2i(1, 14)
+
+var enemies_alive := 0
+var level := 1
+var transitioning := false
 
 var rooms: Array[Rect2i] = []
 var padded_rooms: Array[Rect2i] = []
@@ -36,7 +41,7 @@ const CORRIDOR_WIDTH = 3
 const WALL_THICKNESS = 1
 
 func _ready():
-	pass
+	add_to_group("dungeon")
 
 func generate_dungeon():
 	fill_background()
@@ -307,6 +312,20 @@ func spawn_enemy_at(tile_pos: Vector2i) -> void:
 	enemy.position = floor_tilemaplayer.map_to_local(tile_pos)
 	add_child(enemy)
 	
+	enemies_alive += 1
+	
+	enemy.tree_exited.connect(_on_enemy_died)
+
+func _on_enemy_died():
+	if transitioning:
+		return
+	enemies_alive -= 1
+	
+	print("Enemies left:", enemies_alive)
+	
+	if enemies_alive <= 0:
+		spawn_portal()
+
 func place_fire_obstacles():
 	var spawn_center = spawn_room.position + spawn_room.size / 2
 	
@@ -444,3 +463,67 @@ func spawn_health_pack_at(tile_pos: Vector2i):
 	add_child(pack)
 	
 	print("Health pack at:", tile_pos)
+	
+func spawn_portal():
+	if not is_instance_valid(floor_tilemaplayer):
+		return
+	
+	if spawn_room == null:
+		return
+	
+	var center = get_room_center(spawn_room)
+	center += Vector2i(randi_range(-1, 1), randi_range(-1, 1))
+	
+	var portal = portal_scene.instantiate()
+	portal.position = floor_tilemaplayer.map_to_local(center)
+	portal.z_index = 1
+	add_child.call_deferred(portal)
+	
+func next_level():
+	if transitioning:
+		return
+	transitioning = true
+	level += 1
+	print("NEXT LEVEL: ", level)
+	
+	clear_dungeon()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	scale_difficulty()
+	generate_dungeon()
+	spawn_enemies()
+	reposition_player()
+	
+	transitioning = false
+	
+func reposition_player():
+	var player = get_tree().get_first_node_in_group("player")
+	if player and spawn_room:
+		var center = get_room_center(spawn_room)
+		player.position = floor_tilemaplayer.map_to_local(center)
+		
+func clear_dungeon():
+	background_tilemaplayer.clear()
+	floor_tilemaplayer.clear()
+	wall_tilemaplayer.clear()
+	
+	rooms.clear()
+	padded_rooms.clear()
+	room_centers.clear()
+	corridors.clear()
+	spawn_room = null
+	enemies_alive = 0
+	
+	for child in get_children():
+		if child.is_in_group("player"):
+			continue
+		if child is TileMapLayer:
+			continue
+		child.queue_free()
+
+func scale_difficulty():
+	num_rooms = num_rooms + level * 2
+	
+	room_width_max = 16 + level
+	room_height_max = 16 + level

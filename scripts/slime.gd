@@ -20,6 +20,7 @@ var player = null
 @onready var health_bar = $EnemyHealthBar
 
 func _ready():
+	add_to_group("enemies")
 	process_mode = Node.PROCESS_MODE_PAUSABLE # pausable
 	health_bar.initialize(MAX_HEALTH)
 	var players = get_tree().get_nodes_in_group("player")
