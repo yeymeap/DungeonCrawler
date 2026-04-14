@@ -4,6 +4,8 @@ extends Node2D
 @onready var floor_tilemaplayer: TileMapLayer = $Floor
 @onready var wall_tilemaplayer: TileMapLayer = $Wall
 @onready var enemy_scene = preload("res://scenes/slime.tscn")
+@onready var fire_obstacle_scene = preload("res://scenes/fire_obstacle.tscn")
+@onready var health_pack_scene = preload("res://scenes/health_pack.tscn")
 
 @export_enum("L-corridor", "Random Walk") var connect_type: String = "L-corridor"
 @export var play_area_min = -50
@@ -43,8 +45,10 @@ func generate_dungeon():
 	create_corridors()
 	spawn_room = rooms.pick_random()
 	#print(corridors)
-	print(room_centers)
-
+	#print(room_centers)
+	place_fire_obstacles()
+	spawn_health_packs() 
+	
 func fill_background() -> void: # fill with background tiles
 	for y in range(-100, 100):
 		for x in range(-100, 100):
@@ -302,3 +306,141 @@ func spawn_enemy_at(tile_pos: Vector2i) -> void:
 	var enemy = enemy_scene.instantiate()
 	enemy.position = floor_tilemaplayer.map_to_local(tile_pos)
 	add_child(enemy)
+	
+func place_fire_obstacles():
+	var spawn_center = spawn_room.position + spawn_room.size / 2
+	
+	for room in rooms:
+		if room == spawn_room:
+			continue
+			
+		var room_center = room.position + room.size / 2
+		var distance = room_center.distance_to(spawn_center)
+		
+		if distance < 30:
+			continue
+		
+		var entrances = find_room_entrances(room)
+		
+		if entrances.size() > 0 and randf() < 0.5:
+			var entrance = entrances.pick_random()
+			spawn_fire_at(entrance)
+
+func find_room_entrances(room: Rect2i) -> Array[Vector2i]:
+	var entrances: Array[Vector2i] = []
+	
+	# TOP
+	for x in range(room.position.x - 1, room.position.x + room.size.x + 1):
+		var pos = Vector2i(x, room.position.y - 1)
+		if is_floor_tile(pos):
+			entrances.append(get_corridor_center(pos, Vector2i(0, -1)))
+			break
+	
+	# BOTTOM
+	for x in range(room.position.x - 1, room.position.x + room.size.x + 1):
+		var pos = Vector2i(x, room.position.y + room.size.y)
+		if is_floor_tile(pos):
+			entrances.append(get_corridor_center(pos, Vector2i(0, 1)))
+			break
+	
+	# LEFT
+	for y in range(room.position.y - 1, room.position.y + room.size.y + 1):
+		var pos = Vector2i(room.position.x - 1, y)
+		if is_floor_tile(pos):
+			entrances.append(get_corridor_center(pos, Vector2i(-1, 0)))
+			break
+	
+	# RIGHT
+	for y in range(room.position.y - 1, room.position.y + room.size.y + 1):
+		var pos = Vector2i(room.position.x + room.size.x, y)
+		if is_floor_tile(pos):
+			entrances.append(get_corridor_center(pos, Vector2i(1, 0)))
+			break
+	
+	return entrances
+	
+func get_corridor_center(start_pos: Vector2i, direction: Vector2i) -> Vector2i:
+	
+	var perpendicular: Vector2i
+	
+	if direction.x != 0:
+		perpendicular = Vector2i(0, 1)
+	else:
+		perpendicular = Vector2i(1, 0)
+	
+	var tiles: Array[Vector2i] = []
+	
+	for i in range(-2, 3):
+		var check_pos = start_pos + perpendicular * i
+		if is_floor_tile(check_pos):
+			tiles.append(check_pos)
+	
+	if tiles.is_empty():
+		return start_pos
+	
+	return tiles[tiles.size() / 2] - direction
+	
+func get_corridor_position(wall_pos: Vector2i) -> Vector2i:
+	if not is_wall_tile(wall_pos):
+		return Vector2i.ZERO
+	
+	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+	for dir in directions:
+		var adjacent = wall_pos + dir
+		if is_floor_tile(adjacent):
+			return adjacent
+	
+	return Vector2i.ZERO
+
+func is_entrance(pos: Vector2i) -> bool:
+	if not is_wall_tile(pos):
+		return false
+	
+	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+	for dir in directions:
+		var adjacent = pos + dir
+		if is_floor_tile(adjacent):
+			return true
+	
+	return false
+
+func spawn_fire_at(tile_pos: Vector2i):
+	var fire = fire_obstacle_scene.instantiate()
+	
+	var world_pos = floor_tilemaplayer.map_to_local(tile_pos)
+	fire.position = world_pos
+	
+	add_child(fire)
+	print("Fire obstacle at tile:", tile_pos, "world pos:", world_pos)
+
+func spawn_health_packs():
+	var spawn_center = spawn_room.position + spawn_room.size / 2
+	
+	var placed_at_least_one = false
+	
+	for room in rooms:
+		if room == spawn_room:
+			continue
+		
+		var room_center = room.position + room.size / 2
+		var distance = room_center.distance_to(spawn_center)
+		
+		if distance < 20:
+			continue
+		
+		if randf() > 0.4 and placed_at_least_one:
+			continue
+		
+		var spawn_pos = get_room_center(room)
+		
+		spawn_pos += Vector2i(randi_range(-1, 1), randi_range(-1, 1))
+		
+		spawn_health_pack_at(spawn_pos)
+		placed_at_least_one = true
+
+func spawn_health_pack_at(tile_pos: Vector2i):
+	var pack = health_pack_scene.instantiate()
+	pack.position = floor_tilemaplayer.map_to_local(tile_pos)
+	add_child(pack)
+	
+	print("Health pack at:", tile_pos)

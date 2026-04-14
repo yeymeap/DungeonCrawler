@@ -45,6 +45,7 @@ animations = [{
 size = Vector2(14, 12)
 
 [node name="Slime" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 8
 collision_mask = 5
 script = ExtResource("1_n6pvg")
 

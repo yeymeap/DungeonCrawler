@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://bvge42uu3xrcp"]
+[gd_scene load_steps=29 format=3 uid="uid://bgkfkgb2qs60p"]
 
 [ext_resource type="Texture2D" uid="uid://dhy636g13vdg3" path="res://assets/sprites/knight.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://tvpcnmfiaan5" path="res://scripts/player.gd" id="1_4flbx"]
@@ -168,6 +168,7 @@ radius = 25.0
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 z_index = 5
 collision_layer = 2
+collision_mask = 9
 script = ExtResource("1_4flbx")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -189,6 +190,7 @@ script = ExtResource("3_qhqgy")
 
 [node name="MeleeAttack" type="Area2D" parent="."]
 collision_layer = 0
+collision_mask = 8
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeAttack"]

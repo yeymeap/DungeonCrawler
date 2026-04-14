@@ -111,3 +111,19 @@ func player_die():
 	
 	print("Reloading scene")
 	get_tree().reload_current_scene()
+
+func heal(amount) -> bool:
+	if is_dead or health >= MAX_HEALTH:
+		return false
+	
+	health += amount
+	health = clamp(health, 0, MAX_HEALTH)
+	health_bar.value = health
+	
+	print("Health after heal:", health)
+	
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color(0.5, 1, 0.5), 0.1)
+	tween.tween_property(sprite, "modulate", Color(1, 1, 1), 0.1)
+	
+	return true
