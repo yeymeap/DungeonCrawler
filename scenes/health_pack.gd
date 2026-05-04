@@ -30,6 +30,5 @@ func _on_body_entered(body):
 func _process(delta):
 	time += delta
 	
-	# Smooth pulse (not jittery like Time.get_ticks)
 	var pulse = 1.0 + sin(time * 3.0) * 0.1
 	scale = base_scale * pulse

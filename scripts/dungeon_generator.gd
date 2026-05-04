@@ -33,7 +33,7 @@ var room_centers: Array[Vector2i] = []
 var corridors: Array = []
 var spawn_room 
 
-const FLOOR_TILE = Vector2i(1, 14)
+const FLOOR_TILE = Vector2i(0, 12)
 #const WALL_TILE = Vector2i(2, 14)
 const WALL_TILE = Vector2i(7, 0)
 
@@ -79,9 +79,8 @@ func generate_room(origin: Vector2i) -> bool: # generate rooms
 	
 	var padded_room = Rect2i(
 		origin - Vector2i(room_padding, room_padding),
-		Vector2i(room_width + room_padding * 2, room_height + room_padding * 2)
-		)
-		
+		Vector2i(room_width + room_padding * 2, room_height + room_padding * 2))
+	
 	for room in padded_rooms:
 		if padded_room.intersects(room):
 			return false
